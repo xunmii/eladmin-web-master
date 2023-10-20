@@ -1,23 +1,23 @@
 <template>
   <div v-if="!item.hidden" class="menu-wrapper">
-    <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
-      <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
+    <template v-if="hasOneShowingChild(item.children,item) && !onlyOneChild.children">
+      <app-link :to="resolvePath(onlyOneChild.path)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
-          <item :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)" :title="onlyOneChild.meta.title" />
+          <item :title="onlyOneChild.name" />
         </el-menu-item>
       </app-link>
     </template>
 
     <el-submenu v-else ref="subMenu" :index="resolvePath(item.path)" popper-append-to-body>
       <template slot="title">
-        <item v-if="item.meta" :icon="item.meta && item.meta.icon" :title="item.meta.title" />
+        <item :title="item.name" />
       </template>
-      <sidebar-item
-        v-for="child in item.children"
-        :key="child.path"
+      <SideBarItem
+        v-for="(child, index) in item.children"
+        :key="'index_'+index"
         :is-nest="true"
-        :item="child"
-        :base-path="resolvePath(child.path)"
+        :sideitem="child"
+        :basePath="basePath"
         class="nest-menu"
       />
     </el-submenu>
@@ -30,10 +30,12 @@ import { isExternal } from '@/utils/validate'
 import Item from './Item'
 import AppLink from './Link'
 import FixiOSBug from './FixiOSBug'
+import SideBarItem from './SideBarItem'
 
 export default {
-  name: 'SidebarItem',
-  components: { Item, AppLink },
+  name: 'SidebarItemCom',
+  // eslint-disable-next-line vue/no-unused-components
+  components: { Item, AppLink, SideBarItem },
   mixins: [FixiOSBug],
   props: {
     // route object
@@ -78,7 +80,6 @@ export default {
         this.onlyOneChild = { ... parent, path: '', noShowingChildren: true }
         return true
       }
-
       return false
     },
     resolvePath(routePath) {
@@ -90,6 +91,7 @@ export default {
       }
       return path.resolve(this.basePath, routePath)
     }
+
   }
 }
 </script>

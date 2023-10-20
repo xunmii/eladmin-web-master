@@ -22,7 +22,6 @@ router.beforeEach((to, from, next) => { // 路由拦截
       next({ path: '/' })
       NProgress.done()
     } else {
-      console.log('roles: ' + store.getters.roles)
       if (store.getters.roles.length === 0) { // 判断当前用户是否已拉取完user_info信息
         store.dispatch('GetInfo').then(() => { // 拉取user_info
           // 动态路由，拉取菜单
@@ -56,14 +55,18 @@ export const loadMenus = (next, to) => {
   buildMenus('front_menu').then(res => {
     const sdata = JSON.parse(JSON.stringify(res))
     const rdata = JSON.parse(JSON.stringify(res))
-    const sidebarRoutes = filterAsyncRouter(sdata)
-    const rewriteRoutes = filterAsyncRouter(rdata, false, true)
+    // console.log('-----buildMenus-------')
+    const sidebarRoutes = filterAsyncRouter(sdata.value)
+    const rewriteRoutes = filterAsyncRouter(rdata.value, false, true)
     rewriteRoutes.push({ path: '*', redirect: '/404', hidden: true })
+    // console.log('rewriteRoutes==============')
+    // console.log(rewriteRoutes)
 
     store.dispatch('GenerateRoutes', rewriteRoutes).then(() => { // 存储路由
       router.addRoutes(rewriteRoutes) // 动态添加可访问路由表
       next({ ...to, replace: true })
     })
+    // console.log('-----buildMenus-------')
     store.dispatch('SetSidebarRouters', sidebarRoutes)
   })
 }
